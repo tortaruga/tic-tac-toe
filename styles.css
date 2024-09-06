@@ -1,0 +1,38 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+.board {
+    margin: 3rem auto;
+    display: flex;
+    flex-wrap: wrap;
+    width: 302px;
+    gap: 1px;
+}
+
+.tile {
+    width: 100px; 
+    aspect-ratio: 1;
+    background-color: aqua;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+}
+
+.game-over-display {
+    display: none;
+}
+
+.reset-button {
+    margin: auto 10rem; 
+}
+
+.level-btns {
+    display: none;
+}
