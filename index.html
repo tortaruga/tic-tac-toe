@@ -8,12 +8,16 @@
     <script defer src="./app.js"></script>
 </head>
 <body>
+  <button id="change-mode-btn" title="change mode">
+    <img class="mode-icon" src="./images/dark-mode.png" alt="change-mode-icon">
+  </button>
+  
     <main>
       <h1 class="main-heading">tic <span class="heading-span">tac</span> toe</h1>
       <div class="btns">
-        <button class="two-players-btn">2 players</button>
-        <button class="computer-btn">play against computer</button>  
-        <button class="ai-battle-btn">or watch the computer play against itself</button>
+        <button class="dark two-players-btn">2 players</button>
+        <button class="dark computer-btn">play against computer</button>  
+        <button class="dark ai-battle-btn">or watch the computer play against itself</button>
       </div>
       
       <div class="board"></div>
@@ -25,7 +29,7 @@
     </main>
     
     <footer>
-      <p class="attribution">coded by <a href="">tortaruga</a> ✨</p>
+      <p class="attribution">coded by <a class="dark" href="https://github.com/tortaruga">tortaruga</a> ✨</p>
     </footer>
 
 </body>

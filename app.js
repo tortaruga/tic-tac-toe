@@ -7,6 +7,61 @@ const boardContainer = document.querySelector('.board');
 const result = document.getElementById('result');
 const gameOverDisplay = document.querySelector('.game-over-display');
 let tiles;
+const changeModeBtn = document.getElementById('change-mode-btn');
+const modeIcon = document.querySelector('.mode-icon');
+ 
+const darkModeBg = '#202027';
+const darkModeText = '#fff'
+
+const body = document.querySelector('body');
+const darkModeElements = document.querySelectorAll('.dark'); 
+
+function isDark() {
+    if (modeIcon.src.includes('dark-mode.png')) {
+        return true;
+    } else if (modeIcon.src.includes('light-mode.png')) {
+        return false;
+    }
+}
+
+function changeMode(mode) {
+    if (mode == 'dark') {
+        modeIcon.src = './images/light-mode.png';
+        body.style.background = darkModeBg;
+        if (tiles) {
+            tiles.forEach(tile => {
+                tile.style.setProperty('--bg', darkModeBg);
+                tile.style.setProperty('--text', darkModeText);
+            })
+           }
+             
+        darkModeElements.forEach(el => {
+        el.style.setProperty('--bg', darkModeBg);
+        el.style.setProperty('--text', darkModeText);
+    })
+    } else if (mode == 'light') {
+        modeIcon.src = './images/dark-mode.png';
+        body.style.background = darkModeText;
+        darkModeElements.forEach(element => {
+          element.style.setProperty('--bg', darkModeText);
+          element.style.setProperty('--text', darkModeBg);
+        })
+        if (tiles) {
+            tiles.forEach(tile => {
+                tile.style.setProperty('--bg', darkModeText);
+                tile.style.setProperty('--text', darkModeBg);
+            })
+           }
+    }
+}
+
+changeModeBtn.addEventListener('click', () => {
+    if (isDark()) {
+        changeMode('dark')
+    } else {
+       changeMode('light')
+    }
+});
 
 
 const playerX_color = '#ab3585';
@@ -63,6 +118,12 @@ function startGame() {
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
+    if (isDark) {
+        tiles.forEach(tile => {
+            tile.style.setProperty('--bg', darkModeBg);
+            tile.style.setProperty('--text', darkModeText);
+        })
+    }
     handleBorders()
     resetBoard();
     currentPlayer = playerX; 
@@ -146,9 +207,10 @@ function gameOver(board, player1, player2) {
 }
 
 function createBoard() {
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 9; i++) { 
         const tile = document.createElement('div');
         tile.classList.add('tile');
+        tile.classList.add('dark');
         boardContainer.appendChild(tile);
     }
 }
@@ -276,6 +338,12 @@ aiBattleBtn.addEventListener('click', () => {
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
+    if (isDark) {
+        tiles.forEach(tile => {
+            tile.style.setProperty('--bg', darkModeBg);
+            tile.style.setProperty('--text', darkModeText);
+        })
+    }
     handleBorders();
     resetBoard();
     currentPlayer = playerX; 
