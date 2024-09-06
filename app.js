@@ -118,12 +118,17 @@ function startGame() {
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
-    if (isDark) {
+    
+    if (isDark()) {
         tiles.forEach(tile => {
-            tile.style.setProperty('--bg', darkModeBg);
+            tile.style.setProperty('--text', darkModeBg);
+        })
+    } else {
+        tiles.forEach(tile => {
             tile.style.setProperty('--text', darkModeText);
         })
     }
+
     handleBorders()
     resetBoard();
     currentPlayer = playerX; 
@@ -338,12 +343,16 @@ aiBattleBtn.addEventListener('click', () => {
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
-    if (isDark) {
+    if (isDark()) {
         tiles.forEach(tile => {
-            tile.style.setProperty('--bg', darkModeBg);
+            tile.style.setProperty('--text', darkModeBg);
+        })
+    } else {
+        tiles.forEach(tile => {
             tile.style.setProperty('--text', darkModeText);
         })
     }
+
     handleBorders();
     resetBoard();
     currentPlayer = playerX; 
