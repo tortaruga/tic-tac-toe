@@ -2,10 +2,23 @@ const resetBtn = document.querySelector('.reset-button');
 const twoPlayersBtn = document.querySelector('.two-players-btn');
 const computerBtn = document.querySelector('.computer-btn');
 const aiBattleBtn = document.querySelector('.ai-battle-btn');
+const btns = document.querySelector('.btns');
 const boardContainer = document.querySelector('.board');
 const result = document.getElementById('result');
 const gameOverDisplay = document.querySelector('.game-over-display');
 let tiles;
+
+
+const playerX_color = '#ab3585';
+const playerO_color = '#ffad03';
+
+function handleColor(tile, player) {
+    if (player == playerO) {
+        tile.style.color = playerO_color
+    } else {
+        tile.style.color = playerX_color
+    }
+}
 
 let againstComputer;
 let easy;
@@ -14,11 +27,13 @@ let hard;
 
 twoPlayersBtn.addEventListener('click', () => {
     againstComputer = false;
+    hide(btns);
     startGame();
 })
 
 computerBtn.addEventListener('click', () => {
     againstComputer = true;
+    hide(btns);
     startGame();
 })
 
@@ -29,6 +44,8 @@ function resetBoard() {
 resetBtn.addEventListener('click', () => {
     deleteBoard();
     resetBooleans();
+    show(btns);
+    hide(gameOverDisplay);
     // startGame();
 });
 
@@ -46,6 +63,7 @@ function startGame() {
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
+    handleBorders()
     resetBoard();
     currentPlayer = playerX; 
     boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -70,7 +88,8 @@ function playerTurn(board, player) {
                     tile.innerHTML = player;
                     board[index] = player;
                     console.log(tile.innerHTML);
-                    console.log(board)
+                    console.log(board);
+                    handleColor(tile, player);
                 if (!againstComputer) {
                     player == playerX ? player = playerO : player = playerX;
                     playerTurn(board, player);    
@@ -78,8 +97,8 @@ function playerTurn(board, player) {
                 //   minimax
 
                     setTimeout(function() {
-                        computerTurn(board, playerO);
-                    }, 1000)
+                        computerTurn(board, playerO, depth = 0, 1);
+                    }, 800)
                 }    
                 } 
             }, { once: true });
@@ -123,7 +142,7 @@ function gameOver(board, player1, player2) {
     } else {
         result.innerHTML = 'It\'s a tie!!!'
     }
-    gameOverDisplay.style.display = 'inline-block'
+    show(gameOverDisplay);
 }
 
 function createBoard() {
@@ -132,6 +151,18 @@ function createBoard() {
         tile.classList.add('tile');
         boardContainer.appendChild(tile);
     }
+}
+
+function handleBorders() {
+    tiles.forEach((tile, index) => {
+            if (index === 0 || index % 3 === 0) {
+                tile.classList.add('no-border-left');
+            }
+            if (index === 6 || index === 7 || index === 8) {
+                tile.classList.add('no-border-bottom');     
+            }
+        })
+
 }
 
 function deleteBoard() {
@@ -144,19 +175,20 @@ function emptyIndexes(board) {
     return board.filter(spot => spot != 'O' && spot != 'X')
 }
 
-function minimax(board, player) {
+function minimax(board, player, depth = 0, maxDepth) {
     let availableSpots = emptyIndexes(board);
 
     if (win(board, playerX)) {
-        return {score: -10};
+        return {score: -10 + depth };
     } else if (win(board, playerO)) {
-        return {score: 10};
+        return {score: 10 - depth};
     } else if (availableSpots.length === 0) {
         return {score: 0};
+    } else if (depth >= maxDepth) {
+        return {score: 0}; 
     }
 
     let moves = [];
-
 
     for (let i = 0; i < availableSpots.length; i++) {
         let move = {};
@@ -165,9 +197,9 @@ function minimax(board, player) {
 
         let result;
         if (player == playerO) {
-            result = minimax(board, playerX);
+            result = minimax(board, playerX, depth);
         } else {
-            result = minimax(board, playerO);
+            result = minimax(board, playerO, maxDepth);
         }
         move.score = result.score;
 
@@ -175,12 +207,15 @@ function minimax(board, player) {
         moves.push(move);
     }
 
+    let bestMoves = [];
     if (player == playerO) {
         let bestScore = -Infinity;
         for (let i = 0; i < moves.length; i++) {
             if (moves[i].score > bestScore) {
                 bestScore = moves[i].score;
-                bestMove = i;
+                bestMoves = [i];
+            } else if (moves[i].score === bestScore) {
+                bestMoves.push(i)
             }
         }
     } else {
@@ -188,10 +223,20 @@ function minimax(board, player) {
         for (let i = 0; i < moves.length; i++) {
             if (moves[i].score < bestScore) {
                 bestScore = moves[i].score;
-                bestMove = i;
+                bestMoves = [i];
+            }else if (moves[i].score === bestScore) {
+                bestMoves.push(i)
             }
         }
     }
+
+    let bestMove;
+    if (Math.random() < 0.05) {
+        bestMove = Math.floor(Math.random() * bestMoves.length);
+    } else {
+        bestMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    }
+
 
     return moves[bestMove];
 }
@@ -204,15 +249,16 @@ function computerTurn(board, player) {
         gameOver(board, playerX, playerO);
     } else {
           
-            let bestMove = minimax(board, player);
+            let bestMove = minimax(board, player, depth = 0, 1);
             tiles[bestMove.index].innerHTML = player;
             board[bestMove.index] = player;
+            handleColor(tiles[bestMove.index], player);
        
             if (aiBattle) { 
                 player = player == playerX ? playerO : playerX;
                 setTimeout(() => {
                     computerTurn(board, player)
-                }, 1000);
+                }, 800);
             } else {
                 playerTurn(board, playerX);    
             }
@@ -221,16 +267,27 @@ function computerTurn(board, player) {
     
 }
 
+
 let aiBattle;
 
 aiBattleBtn.addEventListener('click', () => {
     aiBattle = true;
+    hide(btns);
     deleteBoard();
     createBoard();
     tiles = document.querySelectorAll('.tile');
+    handleBorders();
     resetBoard();
     currentPlayer = playerX; 
     boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     computerTurn(boardState, currentPlayer) 
-    gameOverDisplay.style.display = 'none';  
+    hide(gameOverDisplay);
 })
+
+function hide(element) {
+    element.style.display = 'none';
+}
+
+function show(element) {
+    element.style.display = 'flex';
+}

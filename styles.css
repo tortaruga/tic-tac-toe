@@ -1,32 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+
+:root {
+    --playerX: #ab3585;
+    --playerO: #ffad03;
+    /* --playerO: #fa8b01; */
+    --dark: #202027;
+    --light: #fff
+}
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
+    /* background: var(--dark); */
+    color: var(--playerX);
+    color: var(--playerO);
+    font-family: 'archivo black', sans-serif;
+    text-align:center;
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100vh;
+    padding: 3rem 1rem 1rem;
+}
+
+a {
+    text-decoration: none;
+
+}
+
+a:hover {
+    color: var(--dark);
+}
+
+.attribution {
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: .8rem;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-heading {
+    text-transform: uppercase;
+    margin: auto;
+    width: fit-content;
+    font-size: 3rem;
+}
+
+.heading-span {
+    color: var(--playerX); 
+    /* color: var(--playerO); */
+}
+
+.btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 4rem;
+}
+
+button {
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: .9rem;
+    background: transparent;
+    border: 1px solid var(--dark);
+    color: var(--dark);
+    border-radius: .5rem;
+    padding: .5rem .8rem;
+    cursor: pointer;
+    transition: .3s;
+}
+
+button:hover {
+    color: var(--playerX);
+    border-color: var(--playerX);
 }
 
 .board {
     margin: 3rem auto;
     display: flex;
     flex-wrap: wrap;
-    width: 302px;
-    gap: 1px;
+    width: 300px;
+    /* gap: 1px; */
 }
 
 .tile {
     width: 100px; 
     aspect-ratio: 1;
-    background-color: aqua;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 1.3rem;
+    border-bottom: 1px solid var(--dark);
+    border-left: 1px solid var(--dark);
+}
+
+.no-border-left {
+    border-left: none;
+}
+
+.no-border-bottom {
+    border-bottom: none;
 }
 
 .game-over-display {
     display: none;
+    position: absolute;
+    background: white;
+    border:1px solid var(--playerO);
+    border-radius: .5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    max-width: 300px;
 }
 
 .reset-button {
