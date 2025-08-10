@@ -1,177 +1,119 @@
-const resetBtn = document.querySelector('.reset-button');
-const twoPlayersBtn = document.querySelector('.two-players-btn');
-const computerBtn = document.querySelector('.computer-btn');
-const aiBattleBtn = document.querySelector('.ai-battle-btn');
-const btns = document.querySelector('.btns');
+// DOM variables
+const modeBtns = document.querySelectorAll('.btns.mode button');
+const btnsContainer = document.querySelector('.btns.mode');
+const playAgainBtn = document.querySelector('.play-again-button');
 const boardContainer = document.querySelector('.board');
 const result = document.getElementById('result');
 const gameOverDisplay = document.querySelector('.game-over-display');
+const infoBtn = document.getElementById('info-btn');
+const moreInfoModal = document.querySelector('.computer-move-info');
+const closeModalBtn = document.getElementById('close-modal');
+
+// game variables
+const playerX_color = '#ed9f57';
+const playerO_color = '#4ebdd9';
+
 let tiles;
-const changeModeBtn = document.getElementById('change-mode-btn');
-const modeIcon = document.querySelector('.mode-icon');
- 
-const darkModeBg = '#202027';
-const darkModeText = '#fff'
-
-const body = document.querySelector('body');
-const darkModeElements = document.querySelectorAll('.dark'); 
-
-function isDark() {
-    if (modeIcon.src.includes('dark-mode.png')) {
-        return true;
-    } else if (modeIcon.src.includes('light-mode.png')) {
-        return false;
-    }
-}
-
-function changeMode(mode) {
-    if (mode == 'dark') {
-        modeIcon.src = './images/light-mode.png';
-        body.style.background = darkModeBg;
-        if (tiles) {
-            tiles.forEach(tile => {
-                tile.style.setProperty('--bg', darkModeBg);
-                tile.style.setProperty('--text', darkModeText);
-            })
-           }
-             
-        darkModeElements.forEach(el => {
-        el.style.setProperty('--bg', darkModeBg);
-        el.style.setProperty('--text', darkModeText);
-    })
-    } else if (mode == 'light') {
-        modeIcon.src = './images/dark-mode.png';
-        body.style.background = darkModeText;
-        darkModeElements.forEach(element => {
-          element.style.setProperty('--bg', darkModeText);
-          element.style.setProperty('--text', darkModeBg);
-        })
-        if (tiles) {
-            tiles.forEach(tile => {
-                tile.style.setProperty('--bg', darkModeText);
-                tile.style.setProperty('--text', darkModeBg);
-            })
-           }
-    }
-}
-
-changeModeBtn.addEventListener('click', () => {
-    if (isDark()) {
-        changeMode('dark')
-    } else {
-       changeMode('light')
-    }
-});
-
-
-const playerX_color = '#ab3585';
-const playerO_color = '#ffad03';
-
-function handleColor(tile, player) {
-    if (player == playerO) {
-        tile.style.color = playerO_color
-    } else {
-        tile.style.color = playerX_color
-    }
-}
-
 let againstComputer;
-let easy;
-let medium;
-let hard;
-
-twoPlayersBtn.addEventListener('click', () => {
-    againstComputer = false;
-    hide(btns);
-    startGame();
-})
-
-computerBtn.addEventListener('click', () => {
-    againstComputer = true;
-    hide(btns);
-    startGame();
-})
-
-function resetBoard() {
-    tiles.forEach(tile => tile.innerHTML = '');
-}
-
-resetBtn.addEventListener('click', () => {
-    deleteBoard();
-    resetBooleans();
-    show(btns);
-    hide(gameOverDisplay);
-    // startGame();
-});
-
+let aiBattle;
 let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 let currentPlayer;
 let playerX = 'X';
 let playerO = 'O';
 
-function resetBooleans() {
-    againstComputer = undefined;
-    aiBattle = undefined;
-}
+
+// game
+
+modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (btn.id === 'two-players') {
+            againstComputer = false;
+            prepareGameboard();
+            playerTurn(boardState, currentPlayer); 
+        }
+
+        if (btn.id === 'computer') {
+            againstComputer = true;
+            prepareGameboard();
+            playerTurn(boardState, currentPlayer) 
+        }
+
+        if (btn.id === 'ai-battle') {
+            aiBattle = true;
+            prepareGameboard();
+            computerTurn(boardState, currentPlayer);
+        }
+    })
+})
+
 
 function startGame() {
-    deleteBoard();
     createBoard();
+
     tiles = document.querySelectorAll('.tile');
-    
-    if (isDark()) {
-        tiles.forEach(tile => {
-            tile.style.setProperty('--text', darkModeBg);
-        })
-    } else {
-        tiles.forEach(tile => {
-            tile.style.setProperty('--text', darkModeText);
-        })
-    }
+    handleBorders(tiles);
 
-    handleBorders()
-    resetBoard();
     currentPlayer = playerX; 
-    boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    gameOverDisplay.style.display = 'none';
-
-    playerTurn(boardState, currentPlayer) 
-    
+    boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // reset board state
 }
 
-twoPlayersBtn.addEventListener('click', startGame);
+function prepareGameboard() {
+    toggleVisibility(btnsContainer);
+    startGame();
+}
+
 
 function playerTurn(board, player) {
     if (!isGameActive() || win(board, playerX) || win(board, playerO)) {
         // hadle game over
-        console.log('game over')
-        gameOver(board, playerX, playerO);
+        setTimeout(() => gameOver(board, playerX, playerO), 300);
     } else {
-        console.log(tiles);
         tiles.forEach((tile, index) => {
-                tile.addEventListener('click', () => {
+            tile.onclick = () => {
                     if (tile.innerHTML == '') {
                     tile.innerHTML = player;
                     board[index] = player;
-                    console.log(tile.innerHTML);
-                    console.log(board);
                     handleColor(tile, player);
                 if (!againstComputer) {
                     player == playerX ? player = playerO : player = playerX;
                     playerTurn(board, player);    
                 } else {
-                //   minimax
-
+                    // remove pointer events for tiles when computer is making its move
+                    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('inactive'));
                     setTimeout(function() {
-                        computerTurn(board, playerO, depth = 0, 1);
-                    }, 800)
+                        computerTurn(board, playerO);
+                    }, 800);
                 }    
                 } 
-            }, { once: true });
+            }
         })
     }
 }
-   
+
+function computerTurn(board, player) {
+    if (!isGameActive() || win(board, playerX) || win(board, playerO)) {
+        // hadle game over
+        setTimeout(() => gameOver(board, playerX, playerO), 300);
+    } else {
+          
+            let bestMove = minimax(board, player);
+            tiles[bestMove.index].innerHTML = player;
+            board[bestMove.index] = player;
+            handleColor(tiles[bestMove.index], player);
+       
+            if (aiBattle) { 
+                player = player == playerX ? playerO : playerX;
+                setTimeout(() => {
+                    computerTurn(board, player)
+                }, 800);
+            } else {
+                document.querySelectorAll('.tile').forEach(tile => tile.classList.remove('inactive'));
+                playerTurn(board, playerX);    
+            }
+
+    }
+    
+}  
 
 function isGameActive() {
    if (Array.from(tiles).some(tile => tile.innerHTML == '')) {
@@ -180,7 +122,6 @@ function isGameActive() {
     return false;
    }
 }
-
 
 
 function win(board, player) {
@@ -202,38 +143,43 @@ function win(board, player) {
 
 function gameOver(board, player1, player2) {
     if (win(board, player1)) {
-        result.innerHTML = 'Player X won!'
+        result.innerHTML = 'Player <span>X</span> won!'
     } else if (win(board, player2)) {
-        result.innerHTML = 'Player O won!'
+        result.innerHTML = 'Player <span>O</span> won!'
     } else {
-        result.innerHTML = 'It\'s a tie!!!'
+        result.innerHTML = 'It\'s a tie!'
     }
-    show(gameOverDisplay);
+
+    toggleVisibility(gameOverDisplay);
+    toggleVisibility(document.querySelector('.backdrop'));
 }
 
 function createBoard() {
     for (let i = 0; i < 9; i++) { 
         const tile = document.createElement('div');
         tile.classList.add('tile');
-        tile.classList.add('dark');
         boardContainer.appendChild(tile);
     }
 }
 
-function handleBorders() {
-    tiles.forEach((tile, index) => {
-            if (index === 0 || index % 3 === 0) {
-                tile.classList.add('no-border-left');
-            }
-            if (index === 6 || index === 7 || index === 8) {
-                tile.classList.add('no-border-bottom');     
-            }
-        })
-
-}
-
 function deleteBoard() {
     boardContainer.innerHTML = ''
+}
+
+// reset
+playAgainBtn.addEventListener('click', () => {
+    deleteBoard();
+    resetBooleans();
+
+    toggleVisibility(btnsContainer);
+    toggleVisibility(gameOverDisplay);
+    toggleVisibility(document.querySelector('.backdrop'));
+
+});
+
+function resetBooleans() {
+    againstComputer = undefined;
+    aiBattle = undefined;
 }
 
 
@@ -242,129 +188,87 @@ function emptyIndexes(board) {
     return board.filter(spot => spot != 'O' && spot != 'X')
 }
 
-function minimax(board, player, depth = 0, maxDepth) {
+function minimax(board, player) {
     let availableSpots = emptyIndexes(board);
 
     if (win(board, playerX)) {
-        return {score: -10 + depth };
+        return {score: -10}; // if opponent wins, score is negative
     } else if (win(board, playerO)) {
-        return {score: 10 - depth};
+        return {score: 10}; // if player wins, score is positie
     } else if (availableSpots.length === 0) {
-        return {score: 0};
-    } else if (depth >= maxDepth) {
-        return {score: 0}; 
+        return {score: 0}; // if it's a draw, score is 0
     }
 
     let moves = [];
 
     for (let i = 0; i < availableSpots.length; i++) {
         let move = {};
-        move.index = board[availableSpots[i]];
+        move.index = availableSpots[i];
         board[availableSpots[i]] = player;
 
         let result;
-        if (player == playerO) {
-            result = minimax(board, playerX, depth);
+        if (player === playerO) {
+            result = minimax(board, playerX);
         } else {
-            result = minimax(board, playerO, maxDepth);
+            result = minimax(board, playerO);
         }
-        move.score = result.score;
 
+        move.score = result.score;
         board[availableSpots[i]] = move.index;
         moves.push(move);
     }
 
+    // Randomness: 1% chance to pick any move
+    if (Math.random() < 0.01) {
+        return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    // Otherwise, pick best move
     let bestMoves = [];
+    let bestScore = player === playerO ? -Infinity : Infinity;
+
+    for (let i = 0; i < moves.length; i++) {
+        if (
+            (player === playerO && moves[i].score > bestScore) ||
+            (player === playerX && moves[i].score < bestScore)
+        ) {
+            bestScore = moves[i].score;
+            bestMoves = [moves[i]];
+        } else if (moves[i].score === bestScore) {
+            bestMoves.push(moves[i]);
+        }
+    }
+
+    // return bestMoves[bestMoves.length - 1];
+    return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+// style
+function handleColor(tile, player) {
     if (player == playerO) {
-        let bestScore = -Infinity;
-        for (let i = 0; i < moves.length; i++) {
-            if (moves[i].score > bestScore) {
-                bestScore = moves[i].score;
-                bestMoves = [i];
-            } else if (moves[i].score === bestScore) {
-                bestMoves.push(i)
-            }
-        }
+        tile.style.color = playerO_color
     } else {
-        let bestScore = Infinity;
-        for (let i = 0; i < moves.length; i++) {
-            if (moves[i].score < bestScore) {
-                bestScore = moves[i].score;
-                bestMoves = [i];
-            }else if (moves[i].score === bestScore) {
-                bestMoves.push(i)
-            }
-        }
+        tile.style.color = playerX_color
     }
+}
 
-    let bestMove;
-    if (Math.random() < 0.05) {
-        bestMove = Math.floor(Math.random() * bestMoves.length);
-    } else {
-        bestMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
-    }
-
-
-    return moves[bestMove];
+function toggleVisibility(element) {
+    element.classList.toggle('hide');
 }
 
 
-function computerTurn(board, player) {
-    if (!isGameActive() || win(board, playerX) || win(board, playerO)) {
-        // hadle game over
-        console.log('game over')
-        gameOver(board, playerX, playerO);
-    } else {
-          
-            let bestMove = minimax(board, player, depth = 0, 1);
-            tiles[bestMove.index].innerHTML = player;
-            board[bestMove.index] = player;
-            handleColor(tiles[bestMove.index], player);
-       
-            if (aiBattle) { 
-                player = player == playerX ? playerO : playerX;
-                setTimeout(() => {
-                    computerTurn(board, player)
-                }, 800);
-            } else {
-                playerTurn(board, playerX);    
+function handleBorders(tiles) {
+    tiles.forEach((tile, index) => {
+
+            if (index === 0 || index % 3 === 0) {
+                tile.classList.add('no-border-left'); 
             }
-
-    }
-    
-}
-
-
-let aiBattle;
-
-aiBattleBtn.addEventListener('click', () => {
-    aiBattle = true;
-    hide(btns);
-    deleteBoard();
-    createBoard();
-    tiles = document.querySelectorAll('.tile');
-    if (isDark()) {
-        tiles.forEach(tile => {
-            tile.style.setProperty('--text', darkModeBg);
+            if (index === 6 || index === 7 || index === 8) {
+                tile.classList.add('no-border-bottom'); 
+            }
         })
-    } else {
-        tiles.forEach(tile => {
-            tile.style.setProperty('--text', darkModeText);
-        })
-    }
-
-    handleBorders();
-    resetBoard();
-    currentPlayer = playerX; 
-    boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    computerTurn(boardState, currentPlayer) 
-    hide(gameOverDisplay);
-})
-
-function hide(element) {
-    element.style.display = 'none';
 }
 
-function show(element) {
-    element.style.display = 'flex';
-}
+// more info modal
+infoBtn.addEventListener('click', () => toggleVisibility(moreInfoModal));
+moreInfoModal.addEventListener('click', () => toggleVisibility(moreInfoModal));
