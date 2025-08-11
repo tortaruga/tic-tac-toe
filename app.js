@@ -239,7 +239,6 @@ function minimax(board, player) {
         }
     }
 
-    // return bestMoves[bestMoves.length - 1];
     return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 }
 
